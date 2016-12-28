@@ -1,0 +1,21 @@
+.homepage {
+  background: url("/intro-bg.jpg") no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+.center {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin-top: -200px;
+  margin-left: -150px;
+}
+
+.intro-text {
+  color: white;
+  text-align: center;
+  font-size: 17px;
+}

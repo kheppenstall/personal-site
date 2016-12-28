@@ -1,0 +1,15 @@
+@import url(http://fonts.googleapis.com/css?family=Roboto+Slab|Open+Sans:400italic,700italic,400,700);
+@import "bootstrap-sprockets";
+@import "bootstrap";
+@import "navbar.scss";
+@import "home.scss";
+@import "font-awesome-sprockets";
+@import "font-awesome";
+
+$default-font: 'Roboto Slab', serif;   
+$open-sans: 'Open Sans', sans-serif;
+
+body {
+  font-family: $default-font;
+  font-weight: normal;
+}
