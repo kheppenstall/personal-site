@@ -1,9 +1,13 @@
+$default-font: 'Roboto Slab', serif;   
+$open-sans: 'Open Sans', sans-serif;
+
 .homepage {
   background: url("/intro-bg.jpg") no-repeat center center fixed; 
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
+  font-family: $open-sans;
 }
 
 .center {
@@ -12,6 +16,7 @@
   left: 50%;
   margin-top: -200px;
   margin-left: -150px;
+  font-family: $default-font;
 }
 
 .intro-text {

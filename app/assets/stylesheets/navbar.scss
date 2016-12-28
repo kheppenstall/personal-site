@@ -1,18 +1,27 @@
+$default-font: 'Roboto Slab', sans-serif;   
+$open-sans: 'Open Sans', sans-serif;
+
 .navbar {
    background-color: transparent;
    background: transparent;
    border-color: transparent;
+   font-family: $open-sans;
+}
+
+.nav.navbar-nav.navbar-right.text li a {
+  font-family: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.nav.navbar-nav.navbar-left.text li a {
+  font-family: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 .nav.navbar-nav.navbar-right li a {
   font-weight: bold;
   color: white;
-  font-family: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
-
 }
 
 .nav.navbar-nav.navbar-left li a {
   color: white;
-  font-family: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: bold;
 }

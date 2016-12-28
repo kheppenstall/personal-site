@@ -6,10 +6,5 @@
 @import "font-awesome-sprockets";
 @import "font-awesome";
 
-$default-font: 'Roboto Slab', serif;   
+$default-font: 'Roboto Slab', sans-serif;   
 $open-sans: 'Open Sans', sans-serif;
-
-body {
-  font-family: $default-font;
-  font-weight: normal;
-}
