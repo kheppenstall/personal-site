@@ -8,8 +8,7 @@
     <%= javascript_include_tag 'application' %>
   </head>
 
-    <body class= <%= "homepage" if @homepage %> >
-    <%#"<%= 'homepage' if @home_page %>
+    <body class= <%= "homepage" if @homepage %> <%= "projects" if @projects %> >
       <%= render partial: "navbar" %>
       <%= yield %>
   </body>
