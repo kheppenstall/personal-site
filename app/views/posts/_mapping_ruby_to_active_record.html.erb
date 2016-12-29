@@ -1,0 +1,135 @@
+<article class="markdown-body entry-content" itemprop="text">
+
+<h3>Introduction</h3>
+
+<p>In any web application, using Ruby to parse data after querying your database is extremely slow. I learned that the hard way. That is not what Ruby was built for. Instead, prefer ActiveRecord methods after your queries. But that means learning a whole new set of methods. This document is to help you learn the ActiveRecord equivalent of Ruby enumerables. Ruby enumerables to ActiveRecord query methods and calculations is not a 1 to 1 mapping. These should be considered as examples to help understand ActiveRecord methods and figure out the best methods to use yourself.</p>
+
+<p><a href="https://ruby-doc.org/core-2.2.3/Enumerable.html">Ruby Enumerables Documentation</a></p>
+
+<p><a href="http://api.rubyonrails.org/classes/ActiveRecord/QueryMethods.html">ActiveRecord Documentation</a></p>
+
+<h3>Context</h3>
+
+<p>Let's consider students, classes, and teachers. Students can be enrolled in many classes. Teachers can teach many classes. Classes can have many students but only one teacher.</p>
+
+<p>And here are our example relationships:</p>
+
+<ul>
+  <li>Many students to many classes</li>
+  <li>1 teacher to many classes</li>
+</ul>
+
+<h4>Models</h4>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Teacher</span> 
+  has_many <span class="pl-c1">:classes</span>
+  has_many <span class="pl-c1">:students</span>, <span class="pl-c1">through:</span> <span class="pl-c1">:classes</span>
+<span class="pl-k">end</span>
+
+<span class="pl-k">class</span> <span class="pl-en">Student</span> 
+  has_many <span class="pl-c1">:classes</span>
+  has_many <span class="pl-c1">:students</span>, <span class="pl-c1">through:</span> <span class="pl-c1">:classes</span>
+<span class="pl-k">end</span>
+
+<span class="pl-k">class</span> <span class="pl-en">Class</span> 
+  belongs_to <span class="pl-c1">:teacher</span>
+  belongs_to <span class="pl-c1">:student</span> 
+<span class="pl-k">end</span></pre></div>
+
+<p>And here are the attributes of each model.</p>
+
+<p>Students have a <code>first_name</code>, <code>last_name</code>, and <code>id</code>.</p>
+
+<p>Teachers have a <code>first_name</code>, <code>last_name</code>, and <code>id</code>.</p>
+
+<p>Classes have a <code>name</code>, <code>enrollment</code> (integer), <code>id</code>.</p>
+
+<h3>Maps</h3>
+
+<ul>
+<li><h4><a id="user-content-find_all--select-ruby-to-where-activerecord" class="anchor" href="#find_all--select-ruby-to-where-activerecord" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>find_all</code> / <code>select</code> (Ruby) to <code>where</code> (ActiveRecord)</h4>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"><span class="pl-c">#</span> Find all students with the first name John</span>
+
+<span class="pl-c"><span class="pl-c">#</span> Ruby</span>
+<span class="pl-c1">Student</span>.all.find_all {|<span class="pl-smi">student</span>| student.first_name <span class="pl-k">==</span> <span class="pl-s"><span class="pl-pds">'</span>John<span class="pl-pds">'</span></span>}  
+
+<span class="pl-c"><span class="pl-c">#</span>ActiveRecord</span>
+<span class="pl-c1">Student</span>.where(<span class="pl-c1">name:</span> <span class="pl-s"><span class="pl-pds">'</span>John<span class="pl-pds">'</span></span>)</pre></div></li>
+<li><h4><a id="user-content-sort_by-ruby-to-order-activerecord-with-one-argument" class="anchor" href="#sort_by-ruby-to-order-activerecord-with-one-argument" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>sort_by</code> (Ruby) to <code>order</code> (ActiveRecord) with one argument</h4>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"><span class="pl-c">#</span> Sort students by last name</span>
+
+<span class="pl-c"><span class="pl-c">#</span> Ruby</span>
+<span class="pl-c1">Student</span>.all.sort_by {|<span class="pl-smi">student</span>| student.last_name}
+
+<span class="pl-c"><span class="pl-c">#</span> ActiveRecord</span>
+<span class="pl-c1">Student</span>.order(<span class="pl-c1">:last_name</span>)</pre></div></li>
+<li><h4><a id="user-content-map-ruby-to-pluck-activerecord" class="anchor" href="#map-ruby-to-pluck-activerecord" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>map</code> (Ruby) to <code>pluck</code> (ActiveRecord)</h4>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"><span class="pl-c">#</span> List of first names of all students</span>
+
+<span class="pl-c"><span class="pl-c">#</span>Ruby</span>
+<span class="pl-c1">Student</span>.all.map {|<span class="pl-smi">student</span>| student.first_name}
+
+<span class="pl-c"><span class="pl-c">#</span> ActiveRecord</span>
+<span class="pl-c1">Student</span>.pluck(<span class="pl-c1">:first_name</span>)</pre></div></li>
+<li><h4><a id="user-content-reduce-ruby-to-sum-activerecord" class="anchor" href="#reduce-ruby-to-sum-activerecord" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>reduce</code> (Ruby) to <code>sum</code> (ActiveRecord)</h4>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"><span class="pl-c">#</span> The sum of enrollments over all classes.</span>
+
+<span class="pl-c"><span class="pl-c">#</span> Ruby</span>
+<span class="pl-c1">Class</span>.all.reduce(<span class="pl-c1">0</span>) {|<span class="pl-smi">sum</span>, <span class="pl-smi">class</span>| sum <span class="pl-k">+=</span> <span class="pl-k">class</span>.enrollment}
+
+<span class="pl-c"><span class="pl-c">#</span>ActiveRecord</span>
+<span class="pl-c1">Class</span>.sum(<span class="pl-c1">:enrollment</span>)</pre></div></li>
+<li><h4><a id="user-content-map-and-compact-ruby-to-joins-and-distinct" class="anchor" href="#map-and-compact-ruby-to-joins-and-distinct" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>map</code> and <code>compact</code> (Ruby) to <code>joins</code> and <code>distinct</code></h4>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"><span class="pl-c">#</span> Find all students enrolled in one or more classes</span>
+
+<span class="pl-c"><span class="pl-c">#</span>Ruby</span>
+<span class="pl-c1">Student</span>.all.map {|<span class="pl-smi">student</span>| student <span class="pl-k">if</span> student.classes.present?}.compact
+
+<span class="pl-c"><span class="pl-c">#</span>ActiveRecord</span>
+<span class="pl-c1">Student</span>.joins(<span class="pl-c1">:classes</span>).includes(<span class="pl-c1">:classes</span>).distinct</pre></div></li>
+<li><h4><a id="user-content-max_by-ruby-maximum-activerecord" class="anchor" href="#max_by-ruby-maximum-activerecord" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>max_by</code> (Ruby) <code>maximum</code> (ActiveRecord)</h4>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"><span class="pl-c">#</span> Find the class with the most students</span>
+
+<span class="pl-c"><span class="pl-c">#</span> Ruby</span>
+<span class="pl-c1">Class</span>.all.max_by {|<span class="pl-smi">class</span>| <span class="pl-k">class</span>.enrollment}
+
+<span class="pl-c"><span class="pl-c">#</span> ActiveRecord</span>
+<span class="pl-c1">Class</span>.maximum(<span class="pl-c1">:enrollment</span>)</pre></div></li>
+<li><h4><a id="user-content-group_by-ruby-to-joins-and-group-activerecord" class="anchor" href="#group_by-ruby-to-joins-and-group-activerecord" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>group_by</code> (Ruby) to <code>joins</code> and <code>group</code> (ActiveRecord)</h4>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"><span class="pl-c">#</span> Return an array with teacher last name as key and number of students the teacher has as value </span>
+
+<span class="pl-c"><span class="pl-c">#</span>Ruby</span>
+<span class="pl-c1">Teacher</span>.all.reduce(<span class="pl-c1">Hash</span>.<span class="pl-k">new</span>(<span class="pl-c1">0</span>)) <span class="pl-k">do </span>|<span class="pl-smi">name_to_students</span>, <span class="pl-smi">teacher</span>|
+  name_to_students[teacher.name] <span class="pl-k">=</span> teacher.students.count
+<span class="pl-k">end</span>
+
+<span class="pl-c"><span class="pl-c">#</span> ActiveRecord</span>
+<span class="pl-c1">Teacher</span>.joins(<span class="pl-c1">:students</span>).group(<span class="pl-c1">:last_name</span>).count(<span class="pl-c1">:id</span>)</pre></div></li>
+<li><h4><a id="user-content-sort_by-ruby-to-order-activerecord-with-multiple-arguments" class="anchor" href="#sort_by-ruby-to-order-activerecord-with-multiple-arguments" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>sort_by</code> (Ruby) to <code>order</code> (ActiveRecord) with multiple arguments</h4>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"><span class="pl-c">#</span> Sort students by last name, then first name</span>
+
+<span class="pl-c"><span class="pl-c">#</span>Ruby</span>
+<span class="pl-c1">Student</span>.all.sort_by {|<span class="pl-smi">student</span>| [student.last_name, student.first_name]}
+
+<span class="pl-c"><span class="pl-c">#</span> ActiveRecord</span>
+<span class="pl-c1">Student</span>.order(<span class="pl-c1">:last_name</span>, <span class="pl-c1">:first_name</span>)</pre></div></li>
+<li><h4><a id="user-content-map-ruby-to-where-activerecord-when-finding-all-execept" class="anchor" href="#map-ruby-to-where-activerecord-when-finding-all-execept" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>map</code> (Ruby) to <code>where</code> (ActiveRecord) when finding all execept</h4>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c"><span class="pl-c">#</span> Return all students not named Joe, John, or Maggie</span>
+first_names <span class="pl-k">=</span> [<span class="pl-s"><span class="pl-pds">'</span>Joe<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>John<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Maggie<span class="pl-pds">'</span></span>]
+
+<span class="pl-c"><span class="pl-c">#</span>Ruby</span>
+<span class="pl-c1">Student</span>.all.map {|<span class="pl-smi">student</span>| student <span class="pl-k">unless</span> first_names.include?(student.first_name)}.compact
+
+<span class="pl-c"><span class="pl-c">#</span> ActiveRecord</span>
+<span class="pl-c1">Student</span>.where.<span class="pl-k">not</span>(<span class="pl-c1">first_name:</span> first_names)</pre></div></li>
+</ul>
+</article>

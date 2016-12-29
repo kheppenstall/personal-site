@@ -1,0 +1,100 @@
+<h3>Framing the Problem</h3>
+
+<p>RSA encryption is one of the most common ways to securely pass data through the web. Examples include SSL, SSH, digital signatures, and PGP. Writing this post helped me understand it better. Hopefully reading it will do the same for you.</p>
+
+<p>Let's frame the problem first. We are the kingpins of our middle school's secret note passing ring. But, notes could be intercepted by teachers at any moment. Anyone in the school needs to be able to pass us a secret note, but no one else should know how to read it. So we want to an encryption system in which we are the only one who knows how to decrypt but anyone can follow our directions and encrypt a message. That way, even if messages are captured as they travel, the contents of the message will remain secret.</p>
+
+<h3>Set Up The System (Make the Public and Private Keys)</h3>
+
+<ol>
+<li><p>Pick two prime numbers <code>p</code> and <code>q</code>. (I picked small ones since they make the examples easy to understand. In practical uses these primes are enormous.)</p>
+
+<p><code>p = 3</code>
+<code>q = 7</code></p></li>
+<li><p>Find some products <code>n</code> and <code>t</code> using those primes.</p>
+
+<pre><code>n = p * q = 7 * 3 = 21
+
+
+t = (n - 1) * (q - 1) =  6 * 2 = 12
+
+</code></pre></li>
+<li><p>Pick an integer <code>e</code> that does not share any factors with <code>t</code>.</p>
+
+<p>I choose <code>5</code> since it is small and shares no factors with <code>12</code>.</p>
+
+<p><code>e = 5</code></p></li>
+<li><p>The tough step! Find an integer <code>d</code> such that <code>d * e mod t = 1</code>.</p>
+
+<p><a href="https://en.wikipedia.org/wiki/Modular_arithmetic">What is mod?</a></p>
+
+<p>So we need to fill in the blank to make this statement true.</p>
+
+<p><code>__ * 5 mod 12 = 1</code></p>
+
+<p><code>17</code> works and is pretty small so let's choose 17.</p>
+
+<p><code>d = 17</code></p>
+
+<ol>
+<li><p>Recap all those numbers we just found.</p>
+
+<pre><code>p = 3
+q = 7
+n = 21
+t = 12
+e = 5
+d = 17
+</code></pre></li>
+</ol></li>
+</ol>
+
+<h3>Publish the Directions (Public Key to Encrypt Message)</h3>
+
+<p>Ok we did some math. Now we need to write some directions for everyone. Right now, no one knows how to use our encryption system. So let's spell it out for them so they can start sending us secret notes.</p>
+
+<p>Disclaimer: The contents of a secret note must be a number.</p>
+
+<p>DIRECTIONS
+1. Change your message into a number somehow. Let's call your message <code>M</code>.
+2. Use the formula <code>C = M^n mod e</code> to calcuate the encrypted message <code>C</code>.
+    <code>M</code> is your message
+    <code>
+    n = 21
+    e = 5
+</code>
+3. Write <code>C</code> on a note and pass it around.</p>
+
+<p>Note: Keep the value of <code>d</code> secret.</p>
+
+<h4>Example</h4>
+
+<p>The secret message we want to pass <code>M</code> is <code>10</code>.</p>
+
+<p>Given that our formula is <code>C = M^e mod n</code>, and <code>e = 5</code> and <code>n = 21</code>.</p>
+
+<pre><code>`C = 10^5 mod 21 = 19`
+</code></pre>
+
+<p>So the content of the secret note <code>C</code> is <code>19</code>.</p>
+
+<h3>Read the Messages (Private Key To Decrypt Message)</h3>
+
+<p>Finally the secret notes are coming in. Let's assume everyone followed our directions when encrypting the message. To decrypt we use our private key, <code>n</code> and <code>d</code>. We will plug in the value of the secret message <code>C</code> into this formula to uncover the original secret message <code>M</code>.</p>
+
+<p><code>M = C^d mod n</code></p>
+
+<h4></a>Example</h4>
+
+<p>The encrypted message <code>C</code> is <code>19</code> (from the example above).</p>
+
+<p>To find the original message <code>M</code>, we use the formula <code>M = C^d mod n</code>, with <code>d = 17</code> and <code>n = 21</code>.</p>
+
+<pre><code>`M = 19^17 mod 21 = 10`
+</code></pre>
+
+<p>We found <code>10</code>, the same number we started with!</p>
+
+<h3>Sum it Up</h3>
+
+<p>Although middle school kids are not lining up to use RSA encryption to pass secret notes, RSA encryption is used extensively to transmit private data over the Internet. The public key <code>n</code> and <code>e</code> can be published and the private key <code>n</code> and <code>d</code> is nearly impossible to find when the starting primes <code>p</code> and <code>q</code> are large enough. This creates a useful one-way information track where anyone can encrypt but only the server-side with the private key can decrypt.</p>
